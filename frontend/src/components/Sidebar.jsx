@@ -15,7 +15,7 @@ import {
 
 function Sidebar({ isOpen, toggleSidebar }) {
   const menuItems = [
-    { to: "/", icon: FaTachometerAlt, label: "Dashboard" },
+    { to: "/Dashboard", icon: FaTachometerAlt, label: "Dashboard" },
     { to: "/Forums", icon: FaComments, label: "Forums" },
     { to: "/Utilisateurs", icon: FaUsers, label: "Utilisateurs" },
     { to: "/Matières", icon: FaBook, label: "Matières" },
@@ -23,7 +23,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
     { to: "/Notifications", icon: FaBell, label: "Notifications" },
     { to: "/Groupes", icon: FaUsersCog, label: "Groupes" },
     { to: "/Paramètres", icon: FaCog, label: "Paramètres" },
-    { to: "/Déconnexion", icon: FaSignOutAlt, label: "Déconnexion" },
+    { to: "/", icon: FaSignOutAlt, label: "Déconnexion" },
   ];
 
   return (
