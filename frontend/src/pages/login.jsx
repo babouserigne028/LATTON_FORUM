@@ -1,35 +1,19 @@
-import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
-import { Eye, EyeOff, MessageCircle } from "lucide-react";
-import { login, register } from "../components/auth";
-import logo from "../assets/favicon.png"; // adapte le chemin si besoin
+import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import logo from "../assets/favicon.png";
+import { login as apiLogin } from "../components/auth"; // Import de la vraie fonction login
 
 const LoginPage = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    code_permanent: "",
     password: "",
     remember: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-
+  const [isLoading, setIsLoading] = useState(false); // Correction ici
   const navigate = useNavigate();
-
-  // Décommente ce bloc pour créer un utilisateur de test au premier chargement
-  // React.useEffect(() => {
-  //   register("admin", "admin");
-  // }, []);
-
-  const handleLogin = () => {
-    const ok = login(formData.email, formData.password);
-    if (ok) {
-      setError("");
-      navigate("/dashboard");
-    } else {
-      setError("Email ou mot de passe incorrect");
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -39,18 +23,25 @@ const LoginPage = () => {
     }));
   };
 
-  //const handleSubmit = async () => {
-  //setIsLoading(true);
+  const togglePassword = () => setShowPassword(!showPassword);
 
-  // Simulation d'une requête de connexion
-  // setTimeout(() => {
-  //setIsLoading(false);
-  //alert('Démonstration - Connexion réussie !');
-  // }, 2000);
-  // };
-
-  const togglePassword = () => {
-    setShowPassword(!showPassword);
+  const handleLogin = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const result = await apiLogin(formData.code_permanent, formData.password);
+      if (result.success) {
+        setError("");
+        setIsLoading(false);
+        navigate("/dashboard");
+      } else {
+        setError(result.error || "Email ou mot de passe incorrect");
+        setIsLoading(false);
+      }
+    } catch {
+      setError("Erreur réseau ou serveur");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,7 +52,7 @@ const LoginPage = () => {
           "linear-gradient(135deg, rgb(18, 36, 44) 0%, rgba(18, 36, 44, 0.9) 50%, rgb(18, 36, 44) 100%)",
       }}
     >
-      {/* Éléments d'animation flottants */}
+      {/* Animation flottante */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="absolute w-10 h-10 rounded-full opacity-30 animate-pulse"
@@ -71,7 +62,7 @@ const LoginPage = () => {
             left: "10%",
             animation: "float 20s infinite linear",
           }}
-        ></div>
+        />
         <div
           className="absolute w-30 h-30 rounded-full opacity-20 animate-pulse"
           style={{
@@ -80,7 +71,7 @@ const LoginPage = () => {
             right: "15%",
             animation: "float 20s infinite linear 7s",
           }}
-        ></div>
+        />
         <div
           className="absolute w-15 h-15 rounded-full opacity-25 animate-pulse"
           style={{
@@ -89,13 +80,12 @@ const LoginPage = () => {
             left: "20%",
             animation: "float 20s infinite linear 14s",
           }}
-        ></div>
+        />
       </div>
 
-      {/* Conteneur principal */}
-      <div className="relative z-10 w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto">
+      <div className="relative z-10 w-full max-w-sm mx-auto">
         <div
-          className="backdrop-blur-xl rounded-3xl p-2 shadow-2xl transform transition-transform duration-300 hover:-translate-y-1"
+          className="backdrop-blur-xl rounded-3xl p-6 shadow-2xl"
           style={{
             background: "rgba(18, 36, 44, 0.95)",
             border: "1px solid rgba(245, 222, 179, 0.2)",
@@ -103,11 +93,11 @@ const LoginPage = () => {
               "0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(245, 222, 179, 0.1)",
           }}
         >
-          {/* Section Logo */}
+          {/* Logo + Titre */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="flex justify-center gap-3 mb-4">
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transform transition-transform duration-300 hover:scale-105"
+                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
                 style={{
                   background:
                     "linear-gradient(135deg, rgb(245, 222, 179), rgba(245, 222, 179, 0.8))",
@@ -116,125 +106,64 @@ const LoginPage = () => {
               >
                 <img
                   src={logo}
-                  alt="Logo Latton Forum"
+                  alt="Logo"
                   className="w-10 h-10 object-contain"
                 />
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                LATTON FORUM
-              </h1>
+              <h1 className="text-2xl font-bold text-white">LATTON FORUM</h1>
             </div>
-            <p className="text-gray-300 text-base mb-2">
-              Bon retour parmi nous
-            </p>
-            <p
-              className="text-sm font-medium"
-              style={{ color: "rgb(245, 222, 179)" }}
-            >
+            <p className="text-gray-300 mb-1">Bon retour parmi nous</p>
+            <p className="text-sm text-[rgb(245,222,179)]">
               Connectez-vous à votre espace communautaire
             </p>
           </div>
 
           {/* Formulaire */}
           <div className="space-y-4">
-            {/* Champ Email */}
-            <div className="relative group">
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Adresse email"
-                required
-                className="w-full px-5 py-4 rounded-xl text-white text-base transition-all duration-300 outline-none group-hover:-translate-y-0.5"
-                style={{
-                  background: "rgba(18, 36, 44, 0.6)",
-                  border: "1px solid rgba(245, 222, 179, 0.2)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "rgb(245, 222, 179)";
-                  e.target.style.background = "rgba(18, 36, 44, 0.8)";
-                  e.target.style.boxShadow =
-                    "0 0 0 3px rgba(245, 222, 179, 0.1)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "rgba(245, 222, 179, 0.2)";
-                  e.target.style.background = "rgba(18, 36, 44, 0.6)";
-                  e.target.style.boxShadow = "none";
-                }}
-              />
-            </div>
+            {/* Email */}
+            <input
+              type="text"
+              name="code_permanent"
+              value={formData.code_permanent}
+              onChange={handleInputChange}
+              placeholder="Code Permanent"
+              className="w-full px-5 py-4 rounded-xl text-white bg-[rgba(18,36,44,0.6)] border border-[rgba(245,222,179,0.2)] outline-none transition focus:border-[rgb(245,222,179)] focus:bg-[rgba(18,36,44,0.8)]"
+              required
+            />
 
-            {/* Champ Mot de passe */}
-            <div className="relative group">
+            {/* Password */}
+            <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="Mot de passe"
+                className="w-full px-5 py-4 pr-12 rounded-xl text-white bg-[rgba(18,36,44,0.6)] border border-[rgba(245,222,179,0.2)] outline-none transition focus:border-[rgb(245,222,179)] focus:bg-[rgba(18,36,44,0.8)]"
                 required
-                className="w-full px-5 py-4 pr-12 rounded-xl text-white text-base transition-all duration-300 outline-none group-hover:-translate-y-0.5"
-                style={{
-                  background: "rgba(18, 36, 44, 0.6)",
-                  border: "1px solid rgba(245, 222, 179, 0.2)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = "rgb(245, 222, 179)";
-                  e.target.style.background = "rgba(18, 36, 44, 0.8)";
-                  e.target.style.boxShadow =
-                    "0 0 0 3px rgba(245, 222, 179, 0.1)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = "rgba(245, 222, 179, 0.2)";
-                  e.target.style.background = "rgba(18, 36, 44, 0.6)";
-                  e.target.style.boxShadow = "none";
-                }}
               />
               <button
                 type="button"
                 onClick={togglePassword}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-300"
-                style={{ color: "rgba(255, 255, 255, 0.5)" }}
-                onMouseEnter={(e) =>
-                  (e.target.style.color = "rgb(245, 222, 179)")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.color = "rgba(255, 255, 255, 0.5)")
-                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.5)] hover:text-[rgb(245,222,179)]"
               >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 
-            {/* Options du formulaire */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-gray-300 cursor-pointer hover:text-white transition-colors duration-300">
+            {/* Options */}
+            <div className="flex justify-between text-sm text-gray-300">
+              <label className="flex items-center gap-2 cursor-pointer hover:text-white">
                 <input
                   type="checkbox"
                   name="remember"
                   checked={formData.remember}
                   onChange={handleInputChange}
-                  className="rounded border-gray-600 text-yellow-400 focus:ring-yellow-400 focus:ring-offset-0"
-                  style={{ accentColor: "rgb(245, 222, 179)" }}
+                  className="accent-[rgb(245,222,179)]"
                 />
                 Se souvenir de moi
               </label>
-              <a
-                href="#"
-                className="font-medium transition-all duration-300 hover:underline"
-                style={{ color: "rgb(245, 222, 179)" }}
-                onMouseEnter={(e) =>
-                  (e.target.style.color = "rgba(245, 222, 179, 0.8)")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.color = "rgb(245, 222, 179)")
-                }
-              >
+              <a href="#" className="text-[rgb(245,222,179)] hover:underline">
                 Mot de passe oublié ?
               </a>
             </div>
@@ -243,103 +172,28 @@ const LoginPage = () => {
             <button
               onClick={handleLogin}
               disabled={isLoading}
-              className="w-full py-4 px-6 rounded-xl font-semibold text-base transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgb(245, 222, 179), rgba(245, 222, 179, 0.9))",
-                color: "rgb(18, 36, 44)",
-                boxShadow: "0 4px 15px rgba(245, 222, 179, 0.2)",
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoading) {
-                  e.target.style.boxShadow =
-                    "0 8px 25px rgba(245, 222, 179, 0.3)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.boxShadow =
-                  "0 4px 15px rgba(245, 222, 179, 0.2)";
-              }}
+              className="w-full py-4 rounded-xl font-semibold bg-[rgb(245,222,179)] text-[rgb(18,36,44)] hover:opacity-90 transition disabled:opacity-50"
             >
-              <div className="flex items-center justify-center">
-                {isLoading && (
-                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
-                )}
-                <span>
-                  {isLoading ? "Connexion en cours..." : "Se connecter"}
-                </span>
-              </div>
+              {isLoading ? "Connexion..." : "Connexion"}
             </button>
-          </div>
 
-          {/* Affichage de l'erreur */}
-          {error && (
-            <div className="mb-4 text-red-400 text-center font-semibold">
-              {error}
-            </div>
-          )}
-
-          {/* Divider */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span
-                className="px-4 text-gray-400"
-                style={{ background: "rgba(18, 36, 44, 0.95)" }}
+            {/* Message d'erreur */}
+            {error && (
+              <p className="text-red-400 text-center text-sm">{error}</p>
+            )}
+            {/* Bouton vers inscription */}
+            <div className="text-center mt-2">
+              <button
+                type="button"
+                onClick={() => navigate("/register")}
+                className="text-[rgb(245,222,179)] hover:underline text-sm"
               >
-                ou
-              </span>
+                Pas encore de compte ? S'inscrire
+              </button>
             </div>
-          </div>
-
-          {/* Lien d'inscription */}
-          <div className="text-center text-sm text-gray-300">
-            Nouveau sur Latton Forum ?{" "}
-            <a
-              href="#"
-              className="font-semibold transition-all duration-300 hover:underline"
-              style={{ color: "rgb(245, 222, 179)" }}
-              onMouseEnter={(e) =>
-                (e.target.style.color = "rgba(245, 222, 179, 0.8)")
-              }
-              onMouseLeave={(e) =>
-                (e.target.style.color = "rgb(245, 222, 179)")
-              }
-            >
-              Créer un compte
-            </a>
           </div>
         </div>
       </div>
-
-      {/* Styles CSS personnalisés */}
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-            opacity: 0.3;
-          }
-          25% {
-            transform: translateY(-20px) rotate(90deg);
-            opacity: 0.1;
-          }
-          50% {
-            transform: translateY(-40px) rotate(180deg);
-            opacity: 0.2;
-          }
-          75% {
-            transform: translateY(-20px) rotate(270deg);
-            opacity: 0.1;
-          }
-        }
-
-        input::placeholder {
-          color: rgba(255, 255, 255, 0.4);
-        }
-      `}</style>
     </div>
   );
 };

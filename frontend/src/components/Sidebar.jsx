@@ -23,7 +23,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
     { to: "/Notifications", icon: FaBell, label: "Notifications" },
     { to: "/Groupes", icon: FaUsersCog, label: "Groupes" },
     { to: "/Paramètres", icon: FaCog, label: "Paramètres" },
-    { to: "/", icon: FaSignOutAlt, label: "Déconnexion" },
+    { to: "/Déconnexion", icon: FaSignOutAlt, label: "Déconnexion" },
   ];
 
   return (
