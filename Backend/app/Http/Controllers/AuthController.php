@@ -7,7 +7,7 @@ use App\Models\Utilisateur; // Ajoutez cette ligne
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Mail;
+
 
 
 class AuthController extends Controller
@@ -70,9 +70,6 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Inscription réussie. Veuillez vous connecter.',
             'utilisateur' => $utilisateur
-
-            //Mail::to($utilisateur->email)->send(new \App\Mail\WelcomeMail($utilisateur));
-
         ], 201);
 
 
